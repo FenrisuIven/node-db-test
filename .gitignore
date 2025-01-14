@@ -1,0 +1,7 @@
+.idea
+data-base
+client-side/node_modules
+client-side/.idea
+server-side/node_modules
+server-side/.idea
+server-side/cofiguration
