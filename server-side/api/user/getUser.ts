@@ -1,47 +1,50 @@
-import { errorMessages } from '../helpers/errorMessages';
-import { dbCredentials } from '../../setup/dbCredentials';
-import { setupConnection } from "../../setup/dbSetub";
-import pg from "pg";
-import url from 'url';
-import {read} from "node:fs";
+import { errorMessages } from '../constants/errorMessages';
+import { IMessage } from "../interfaces/IMessage";
+import { DBAction } from "../types/DBAction";
 
-async function getUserFromDB(req, res) {
-    const requestQuery = url.parse(req.url, true).query;
-    if (Object.keys(requestQuery).length === 0) {
-        throw new Error(`Error: ${errorMessages.NULL_QUERY}`);
+import querystring from 'querystring';
+import url from 'url';
+
+const getUserFromDB:DBAction = async (
+    client, 
+    req
+) : Promise<IMessage> => {
+    if (!req.url) {
+        throw new Error(errorMessages.NULL_URL);
     }
     
-    const client = await setupConnection(dbCredentials);
-    if (Number(client.status)){
-        res.status(client.status).json(JSON.stringify({
-            code: client.code,
-            msg: `${client.statuc}: There was an error connecting to the DataBase`
-        }));
-        res.end();
-        return;
+    const providedUrlQuery = url.parse(req.url).query;
+    if (!providedUrlQuery) {
+        throw new Error(errorMessages.NULL_QUERY);
     }
+    const parsedUrlQuery = querystring.parse(providedUrlQuery) || '';
+    if (Object.keys(parsedUrlQuery).length === 0) {
+        throw new Error(errorMessages.INVALID_QUERY);
+    }    
     
-    const readRes = await client.query(`SELECT * FROM "${requestQuery.table}"`)
+    const readRes = await client.query(`SELECT * FROM "${parsedUrlQuery.table}"`)
         .catch(err => {
-            console.log(err)
-            return {
+            const errorMessage: IMessage = {
                 status: 404,
                 code: err.code,
                 msg: err.toString().slice(7)
-            }
+            };
+            return errorMessage;
         })
-    if (readRes.status) {
-        res.status(readRes.status).json(JSON.stringify({
-            msg: `${readRes.status}: No object matched the target query${readRes.msg ? 
-            ` (PG Error: ${readRes.msg.replace(/\\/g, '')})` : '' }`
-        }));
-        res.end();
-        return;
+    
+    if ('status' in readRes) {
+        return {
+            status: readRes.status,
+            code: readRes.code,
+            msg: `No object matched the target query${readRes.msg ?
+                 ` (PG Error: ${readRes.msg.replace(/\\/g, '')})` : '' }`
+        };
     }
     
-    res.status(200).json(JSON.stringify(readRes.rows));
-    res.end();
-    return;
+    return {
+        status: 200,
+        json: JSON.stringify(readRes.rows)
+    };
 }
 
 export {

@@ -1,8 +1,14 @@
+import { getUserFromDB } from './user/getUser';
+import { handleRequest } from "./requestHandler";
+
 import * as express from 'express';
 const router = express.Router();
 
-import { getUserFromDB } from './user/getUser';
-
-router.get('/api/getUser', getUserFromDB);
+router.get('/api/getUser', async (
+    req, 
+    res
+) => {
+    await handleRequest(req, res, getUserFromDB);
+});
 
 export default router;
