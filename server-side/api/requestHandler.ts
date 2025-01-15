@@ -2,6 +2,7 @@ import { IncomingMessage, ServerResponse } from "node:http";
 import { setupConnection } from "./setup/dbSetub";
 import { dbCredentials } from "./setup/dbCredentials";
 import { DBAction } from "./types/DBAction";
+import {parseUrlQuery} from "./utils/parseUrlQuery";
 
 export async function handleRequest(
     req: IncomingMessage, 
@@ -17,9 +18,12 @@ export async function handleRequest(
         }));
         return;
     }
-    const data = await callback(client, req);
+
+    const parsedUrlQuery = parseUrlQuery(req);
+    const data = await callback(client, req, parsedUrlQuery);
+    
     const returnValue = (() => {
-        if(data.status > 400) {
+        if(data.status >= 400) {
             return JSON.stringify(`${data.status}: ${data.msg} [${data.code}]`);
         } else {
             return typeof data.json === 'string' ? data.json : JSON.stringify(data.json);
