@@ -1,13 +1,13 @@
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const cors = require('cors');
-const app = express();
-const routes = require('./api/router.ts');
+import express from 'express';
+import cookieParser from "cookie-parser";
+import cors from 'cors';
+import router from './api/router';
 
+const app = express();
 app.use(cookieParser());
 app.use(cors());
 app.use(express.json());
 
-app.use('/', routes);
+app.use('/', router);
 
 app.listen(8080);
