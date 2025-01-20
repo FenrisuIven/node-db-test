@@ -1,34 +1,34 @@
 import { parseUrlQuery } from "../utils/parseUrlQuery";
 import { queryTable } from "../utils/queryTable";
-import { IMessage } from "../interfaces/IMessage";
+import { Message } from "../types/Message";
 import { DBAction } from "../types/DBAction";
 import {ParsedUrlQuery} from "node:querystring";
+import {read} from "node:fs";
+import {formatErrorToMessage} from "../utils/formatErrorToMessage";
 
-const getUserFromDB:DBAction = async (
+export const getUserFromDB:DBAction = async (
     client, 
     req,
     urlQuery: ParsedUrlQuery
-) : Promise<IMessage> => {
-    const readRes = await queryTable(
-        client, 
-        `SELECT * FROM "${urlQuery.table}"`
-    );
-    
-    if ('status' in readRes) {
+) : Promise<Message> => {
+    try {
+        const readRes = await queryTable(
+            client,
+            `SELECT * FROM "${urlQuery.table}"`
+        );
+        if ('status' in readRes) {
+            return {
+                status: readRes.status,
+                code: readRes.code,
+                msg: `Bad query${readRes.msg ?
+                    `\nPG Error: ${readRes.msg.replace(/\\/g, '')}` : '' }`
+            };
+        }
         return {
-            status: readRes.status,
-            code: readRes.code,
-            msg: `No object matched the target query${readRes.msg ?
-                 ` (PG Error: ${readRes.msg.replace(/\\/g, '')})` : '' }`
+            status: 200,
+            json: JSON.stringify(readRes.rows)
         };
+    } catch(err: any) {
+        return formatErrorToMessage(err);
     }
-    
-    return {
-        status: 200,
-        json: JSON.stringify(readRes.rows)
-    };
-}
-
-export {
-    getUserFromDB
 }

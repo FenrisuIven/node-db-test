@@ -1,8 +1,9 @@
 import { IncomingMessage, ServerResponse } from "node:http";
+import { returnServerResponse } from "./utils/returnServerResponse";
 import { setupConnection } from "./setup/dbSetub";
 import { dbCredentials } from "./setup/dbCredentials";
 import { DBAction } from "./types/DBAction";
-import {parseUrlQuery} from "./utils/parseUrlQuery";
+import { parseUrlQuery } from "./utils/parseUrlQuery";
 
 export async function handleRequest(
     req: IncomingMessage, 
@@ -11,24 +12,18 @@ export async function handleRequest(
 ) {
     const client = await setupConnection(dbCredentials);
     if ('status' in client){
-        res.statusCode = client.status;
-        res.end(JSON.stringify({
-            code: client.code,
-            msg: `${client.status}: There was an error connecting to the DataBase`
-        }));
+        client.msg = `There was an error connecting to the DataBase`;
+        console.log(client)
+        returnServerResponse(client, res);
         return;
     }
 
     const parsedUrlQuery = parseUrlQuery(req);
-    const data = await callback(client, req, parsedUrlQuery);
+    if ('status' in parsedUrlQuery) {
+        returnServerResponse(parsedUrlQuery, res);
+        return;
+    }
     
-    const returnValue = (() => {
-        if(data.status >= 400) {
-            return JSON.stringify(`${data.status}: ${data.msg} [${data.code}]`);
-        } else {
-            return typeof data.json === 'string' ? data.json : JSON.stringify(data.json);
-        }
-    })();
-    res.statusCode = data.status;
-    res.end(returnValue);
+    const data = await callback(client, req, parsedUrlQuery);
+    returnServerResponse(data, res);
 }

@@ -1,37 +1,39 @@
-import {IUserData} from "../../interfaces/IUserData";
-import {ParsedUrlQuery} from "node:querystring";
+import { UserData } from "../../types/UserData";
+import { ParsedUrlQuery } from "node:querystring";
 
 import crypto from 'crypto';
-import {errorMessages} from "../../constants/errorMessages";
-import {IMessage} from "../../interfaces/IMessage";
+import { errorMessages } from "../../constants/errorMessages";
+import { Message } from "../../types/Message";
+import {formatErrorToMessage} from "../../utils/formatErrorToMessage";
 
 export function getUserDataFromUrlQuery(
     urlQuery: ParsedUrlQuery
-) : IUserData | IMessage{
+) : UserData | Message {
     try {
         console.log(Object.keys(urlQuery).length)
         if (Object.keys(urlQuery).length < 4) {
             throw new TypeError(errorMessages.TOO_FEW_ARGS_USER);
         }
-        if (Object.values(urlQuery)
-            .map(elem => typeof elem).slice(1)
-            .find(providedType => providedType !== 'string')) {
+        
+        // TODO: Most likely, urlQuery already contains data in needed format, this much logic is not necessary;
+        //       Try to shorthand it. It might be possible to use Object.keys(urlQuery) for this.
+
+        console.log(urlQuery);
+        
+        const values = Object.values(urlQuery);
+        const valueOfIncorrectType = values.map((elem: any) => typeof elem).slice(1)
+            .find((providedType: string) => providedType !== 'string');
+        if (valueOfIncorrectType) {
             throw new TypeError(errorMessages.TYPE_MISMATCH);
         }
-        console.log('mkay')
+        
         return {
             id: Number(urlQuery.id),
-            username: urlQuery.user as string || '',
-            email: urlQuery.email as string || '',
-            password: crypto.createHash('md5').update(urlQuery.password as string).digest('hex')
+            username: urlQuery.user,
+            email: urlQuery.email,
+            password: crypto.createHash('md5').update(urlQuery.password).digest('hex')
         };
     } catch (err: any) {
-        let [ errorType, ...errorMessage ] = err.toString().split(' ');
-        errorType = errorType.slice(0, errorType.length - 1);
-        return {
-            status: 400,
-            code: errorType,
-            msg: errorMessage.join(' ')
-        };
+        return formatErrorToMessage(err);
     }
 }
