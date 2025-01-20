@@ -1,4 +1,4 @@
-import { IMessage } from "../interfaces/IMessage";
+import { Message } from "../types/Message";
 import { DBAction } from "../types/DBAction";
 import {parseUrlQuery} from "../utils/parseUrlQuery";
 import {queryTable} from "../utils/queryTable";
@@ -9,7 +9,7 @@ export const addUserToDB:DBAction = async (
     client,
     req,
     urlQuery: ParsedUrlQuery
-) : Promise<IMessage> => {
+) : Promise<Message> => {
     const userData = getUserDataFromUrlQuery(urlQuery);
     
     /*const readRes = await queryTable(

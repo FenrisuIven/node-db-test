@@ -1,4 +1,4 @@
-import { IMessage } from "../interfaces/IMessage";
+import { Message } from "../types/Message";
 import { Client } from "pg";
 
 export async function queryTable(
@@ -7,7 +7,7 @@ export async function queryTable(
 ) {
     return await client.query(queryText)
         .catch(err => {
-            const errorMessage: IMessage = {
+            const errorMessage: Message = {
                 status: 404,
                 code: err.code,
                 msg: err.toString().slice(7)
