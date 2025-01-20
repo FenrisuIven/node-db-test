@@ -1,4 +1,4 @@
-export interface IMessage {
+export type Message = {
     status: number,
     code?: string,
     msg?: string,
