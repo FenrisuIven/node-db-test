@@ -3,10 +3,10 @@ import { ParsedUrlQuery } from "node:querystring";
 import { queryTable } from "../utils/queryTable";
 import { DBAction } from "../types/DBAction";
 import { Message } from "../types/Message";
+import { Client } from "pg";
 
 export const addUserToDB:DBAction = async (
-    client,
-    req,
+    client: Client,
     urlQuery: ParsedUrlQuery
 ) : Promise<Message> => {
     const userData = getUserDataFromUrlQuery(urlQuery);

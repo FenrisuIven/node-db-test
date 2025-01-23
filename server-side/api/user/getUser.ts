@@ -1,14 +1,12 @@
-import { parseUrlQuery } from "../utils/parseUrlQuery";
+import { formatErrorToMessage } from "../utils/formatErrorToMessage";
+import { ParsedUrlQuery } from "node:querystring";
 import { queryTable } from "../utils/queryTable";
-import { Message } from "../types/Message";
 import { DBAction } from "../types/DBAction";
-import {ParsedUrlQuery} from "node:querystring";
-import {read} from "node:fs";
-import {formatErrorToMessage} from "../utils/formatErrorToMessage";
+import { Message } from "../types/Message";
+import { Client } from "pg";
 
 export const getUserFromDB:DBAction = async (
-    client, 
-    req,
+    client: Client, 
     urlQuery: ParsedUrlQuery
 ) : Promise<Message> => {
     try {
