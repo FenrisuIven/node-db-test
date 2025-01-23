@@ -1,9 +1,8 @@
-import { Message } from "../types/Message";
+import { getUserDataFromUrlQuery } from "./utils/getUserDataFromUrlQuery";
+import { ParsedUrlQuery } from "node:querystring";
+import { queryTable } from "../utils/queryTable";
 import { DBAction } from "../types/DBAction";
-import {parseUrlQuery} from "../utils/parseUrlQuery";
-import {queryTable} from "../utils/queryTable";
-import {ParsedUrlQuery} from "node:querystring";
-import {getUserDataFromUrlQuery} from "./utils/getUserDataFromUrlQuery";
+import { Message } from "../types/Message";
 
 export const addUserToDB:DBAction = async (
     client,
@@ -11,12 +10,20 @@ export const addUserToDB:DBAction = async (
     urlQuery: ParsedUrlQuery
 ) : Promise<Message> => {
     const userData = getUserDataFromUrlQuery(urlQuery);
+    if ('status' in userData) { 
+        return {
+            status: userData.status,
+            code: userData.code,
+            msg: userData.msg
+        }
+    }
     
-    /*const readRes = await queryTable(
+    const readRes = await queryTable(
         client,
-        `INSERT INTO "${urlQuery.table}" VALUES(${})`
+        `INSERT INTO "user" VALUES(DEFAULT, '${
+            Object.values(userData).slice(1).join("', '")
+        }')`
     );
-
     if ('status' in readRes) {
         return {
             status: readRes.status,
@@ -24,15 +31,10 @@ export const addUserToDB:DBAction = async (
             msg: `No object matched the target query${readRes.msg ?
                 ` (PG Error: ${readRes.msg.replace(/\\/g, '')})` : '' }`
         };
-    }*/
-    console.log({userData});
-
-    if ('status' in userData) {
-        return userData;
-    } else {
-        return {
-            status: 200,
-            json: userData
-        };
     }
+
+    return {
+        status: 200,
+        msg: 'New user entry was added successfully'
+    };
 }
