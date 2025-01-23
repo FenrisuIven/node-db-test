@@ -24,6 +24,6 @@ export async function handleRequest(
         return;
     }
     
-    const data = await callback(client, req, parsedUrlQuery);
+    const data = await callback(client, parsedUrlQuery);
     returnServerResponse(data, res);
 }
