@@ -3,6 +3,7 @@ import { handleRequest } from "./requestHandler";
 
 import * as express from 'express';
 import {addUserToDB} from "./user/addUser";
+import {removeUserFromDB} from "./user/remUser";
 const router = express.Router();
 
 router.get('/api/getUser', async (
@@ -16,6 +17,13 @@ router.get('/api/addUser', async (
     res
 ) => {
     await handleRequest(req, res, addUserToDB);
+});
+
+router.get('/api/remUser', async (
+   req,
+   res
+) => {
+    await handleRequest(req, res, removeUserFromDB)
 });
 
 export default router;
