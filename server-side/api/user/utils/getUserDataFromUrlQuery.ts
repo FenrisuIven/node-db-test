@@ -12,15 +12,13 @@ export function getUserDataFromUrlQuery(
     urlQuery: ParsedUrlQuery
 ) : UserData | Message {
     try {
-        if (Object.keys(urlQuery).length < 4) {
+        if (Object.keys(urlQuery).length < 3) {
             throw new TypeError(errorMessages.TOO_FEW_ARGS_USER);
         }
         
         const validationRes: UserData = userDataSchema.parse({
-            ...urlQuery,
-            id: Number(urlQuery.id)
+            ...urlQuery
         });
-        
         return {
             ...validationRes,
             password: crypto.createHash('md5').update(validationRes.password).digest('hex')

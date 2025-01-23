@@ -3,7 +3,7 @@ export const errorMessages = {
     NULL_QUERY:     'Provided query was null',
     INVALID_QUERY:  'Provided query had no valid entries',
     
-    TOO_FEW_ARGS_USER:  'Not enough arguments for "user" table: expected 4',
+    TOO_FEW_ARGS_USER:  'Not enough arguments for "user" table: expected 3',
     
     NULL_ID:       'Required ID was not provided',
     TYPE_MISMATCH: 'One of the provided arguments was not of the correct type'

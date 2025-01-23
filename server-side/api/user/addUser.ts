@@ -17,11 +17,10 @@ export const addUserToDB:DBAction = async (
             msg: userData.msg
         }
     }
-    
     const readRes = await queryTable(
         client,
         `INSERT INTO "user" VALUES(DEFAULT, '${
-            Object.values(userData).slice(1).join("', '")
+            Object.values(userData).join("', '")
         }')`
     );
     if ('status' in readRes) {
